@@ -1,0 +1,13 @@
+- What are the differences between RISC and CISC architectures?
+
+- Describe how your implementation:
+
+    * passes arguments
+    * stores local variables
+    * stores global variables
+    * returns values from functions
+
+- In PPC64, What is the purpose of:
+
+    * The TOC
+    * Function descriptors

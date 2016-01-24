@@ -1,0 +1,10 @@
+zztop = 12
+if zztop == 12 {
+    zztop = 15
+}
+if zztop == 15 {
+    zztop = 10
+}
+if zztop + zztop == 20 {
+    zztop = 0
+}

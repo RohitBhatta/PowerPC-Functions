@@ -1,0 +1,12 @@
+go=1
+n=4
+i=0
+f=1
+while (go)
+    if (n==i)
+        go=0
+    else {
+        i=i+1;
+        f=f*i
+    }
+cool=1

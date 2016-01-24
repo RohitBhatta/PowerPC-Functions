@@ -1,0 +1,13 @@
+fun main() {
+    a=2+3*4+5
+    print a
+
+    b=(2+3)*4+5;
+    print b
+
+    c=2+(3*4)+5;
+    print (c);
+
+    d=2+3*(4+5)
+    print (((d)))
+}

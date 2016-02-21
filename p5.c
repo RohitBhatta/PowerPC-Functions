@@ -18,7 +18,7 @@ int structIndex = 0;
 struct Entry {
     struct Entry *next;
     char *name;
-    int index;
+    //int index;
 };
 
 //Global struct
@@ -31,7 +31,7 @@ void set(char *id) {
     if (first == 0) {
         table -> name = id;
         table -> next = NULL;
-        table -> index = structIndex++;
+        //table -> index = structIndex++;
         first++;
         tableCount++;
     }
@@ -58,7 +58,7 @@ void set(char *id) {
             current = current -> next;
             current -> name = id;
             current -> next = NULL;
-            current -> index = structIndex++;
+            //current -> index = structIndex++;
             tableCount++;
         }
     }
@@ -66,9 +66,9 @@ void set(char *id) {
 
 //Renames functions to deal with reserved names in Assembly x86
 char* funcRename(char * var) {
-    if (strcmp(var, "main") == 0) {
+    /*if (strcmp(var, "main") == 0) {
         return var;
-    }
+    }*/
     size_t size = strlen(var) + 1;
     char *fullName = malloc(size);
     strcpy(fullName, "_");
@@ -119,11 +119,11 @@ void myExpression (Expression * e, Fun * p) {
             case eVAL : {
                 //The number outside parentheses might be 8 or 16 or diff idk yet
                 //Copy from register to memory
-                printf("    stdu 5, -8(1)\n");
+                printf("    stdu 4, -8(1)\n");
                 //Check printf syntax
                 printf("    li 4, %lu\n", e -> val);
                 printf("    or 3, 4, 4\n");
-                printf("    ld 5, 0(1)\n");
+                printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 //printf("    addi 1, 1, -16\n");
                 /*printf("    push %%r13\n");
@@ -136,18 +136,18 @@ void myExpression (Expression * e, Fun * p) {
             }
             case ePLUS : {
                 //Copy from register to memory
-                printf("    stdu 5, -8(1)\n");
+                printf("    stdu 4, -8(1)\n");
                 //printf("    push %%r13\n");
                 myExpression(e -> left, p);
-                printf("    ld 5, 0(1)\n");
+                printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    or 4, 3, 3\n");
                 /*printf("    pop %%r13\n");
                 printf("    mov %%r15, %%r13\n");
                 printf("    push %%r13\n");*/
-                printf("    stdu 5, -8(1)\n");
+                printf("    stdu 4, -8(1)\n");
                 myExpression(e -> right, p);
-                printf("    ld 5, 0(1)\n");
+                printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    add 3, 3, 4\n");
                 /*printf("    pop %%r13\n");
@@ -156,18 +156,18 @@ void myExpression (Expression * e, Fun * p) {
             }
             case eMUL : {
                 //Copy from register to memory
-                printf("    stdu 5, -8(1)\n");
+                printf("    stdu 4, -8(1)\n");
                 //printf("    push %%r13\n");
                 myExpression(e -> left, p);
-                printf("    ld 5, 0(1)\n");
+                printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    or 4, 3, 3\n");
                 /*printf("    pop %%r13\n");
                 printf("    mov %%r15, %%r13\n");
                 printf("    push %%r13\n");*/
-                printf("    stdu 5, -8(1)\n");
+                printf("    stdu 4, -8(1)\n");
                 myExpression(e -> right, p);
-                printf("    ld 5, 0(1)\n");
+                printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    mulld 3, 3, 4\n");
                 /*printf("    pop %%r13\n");
@@ -224,7 +224,7 @@ void myExpression (Expression * e, Fun * p) {
                 printf("    or 4, 3, 3\n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
-                printf("    cmpd 3, 5");
+                printf("    cmpd 3, 5\n");
                 //printf("    bgt correct");
                 printf("    beq notcorrect\n");
                 printf("    bne notcorrect\n");
@@ -248,7 +248,8 @@ void myExpression (Expression * e, Fun * p) {
                         }
                     }
                 }
-                //char *newName = funcRename(e -> callName);
+                char *newName = funcRename(e -> callName);
+                printf("    bl %s\n", newName);
                 //printf("    call ");
                 //printf("%s\n", newName);
                 if (e != NULL) {
@@ -365,17 +366,18 @@ void genFun(Fun * p) {
     printf("%s:\n", rename);
     //Set up stack frame
     printf("    mflr 0\n");
+    printf("    stdu 0, -8(1)\n");
     //printf("    stw 0, 8(1)\n");
     //printf("    stwu 1, -16(1)\n");
     /*printf("    push %%rbp\n");
     printf("    mov %%rsp, %%rbp\n");*/
     myStatement(p -> body, p);
-    //This first line might be wrong
-    //printf("    addi 1, 1, 16\n");
-    if (strcmp(p -> name, "main") == 0) {
+    printf("    ld 0, 0(1)\n");
+    printf("    addi 1, 1, 8\n");
+    /*if (strcmp(p -> name, "main") == 0) {
         printf("    b exit\n");
-    }
-    printf("    lwz 0, 8(1)\n");
+    }*/
+    printf("    ld 0, 8(1)\n");
     printf("    mtlr 0\n");
     printf("    blr\n");
     /*if (strcmp(p -> name, "main") == 0) {
@@ -398,6 +400,10 @@ int main(int argc, char *argv[]) {
     Funs *p = parse();
     table = (struct Entry *) malloc(sizeof(struct Entry));
     //printf("    addi 1,2,-8\n");       /* SP */
+    printf("    .global main\n");
+    printf("main:\n");
+    printf("    bl _main\n");
+    printf("    b exit\n");
     genFuns(p);
 
     //This part is weird

@@ -375,10 +375,10 @@ void myStatement(Statement * s, Fun * p) {
             } 
             case sReturn : {
                 myExpression(s -> returnValue, p);
-                printf("    ld 0, 0(1)\n");
-                printf("    addi 1, 1, 8\n");
                 printf("    or 1, 9, 9\n");
                 printf("    ld 9, 0(1)\n");
+                printf("    addi 1, 1, 8\n");
+                printf("    ld 0, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    mtlr 0\n");
                 printf("    blr\n");

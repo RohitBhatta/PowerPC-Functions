@@ -106,8 +106,10 @@ void myExpression (Expression * e, Fun * p) {
                     //printf("    mov %s, %%r15\n", e -> varName);
                 }
                 else {
-                    int offset = 8 * (inside);
-                    printf("    ld 3, %d(1)\n", offset);
+                    //int offset = 8 * (inside);
+                    int offset = 8 * (inside + 1);
+                    printf("    ld 3, %d(9)\n", offset);
+                    //printf("    ld 3, %d(1)\n", offset);
                     //printf("    mov %d(%%rbp), %%r15\n", 8 * (inside + 1));
                 }
                 break;
@@ -280,7 +282,7 @@ void myExpression (Expression * e, Fun * p) {
                     if (e -> callActuals != NULL) {
                         for (int i = 0; i < e -> callActuals -> n; i++) {
                             //printf("    pop %%r14\n");
-                            printf("    ld 4, 0(1)\n");
+                            printf("    ld 5, 0(1)\n");
                             printf("    addi 1, 1, 8\n");
                         }
                     }
@@ -310,8 +312,10 @@ void myStatement(Statement * s, Fun * p) {
                     printf("%s\n", s -> assignName);*/
                 }
                 else {
-                    int offset = 8 * (inside);
-                    printf("    std 3, %d(1)\n", offset);
+                    //int offset = 8 * (inside);
+                    int offset = 8 * (inside + 1);
+                    printf("    std 3, %d(9)\n", offset);
+                    //printf("    std 3, %d(1)\n", offset);
                     //printf("    std 3, %d@toc(2)\n", 8 * (inside + 1));
                     //printf("    mov %%r15, %d(%%rbp)\n", 8 * (inside + 1));
                 }
@@ -373,6 +377,9 @@ void myStatement(Statement * s, Fun * p) {
                 myExpression(s -> returnValue, p);
                 printf("    ld 0, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
+                printf("    or 1, 9, 9\n");
+                printf("    ld 9, 0(1)\n");
+                printf("    addi 1, 1, 8\n");
                 printf("    mtlr 0\n");
                 printf("    blr\n");
                 /*printf("    mov %%rbp, %%rsp\n");
@@ -395,16 +402,26 @@ void genFun(Fun * p) {
     //Set up stack frame
     printf("    mflr 0\n");
     printf("    stdu 0, -8(1)\n");
+    //New 2 lines
+    printf("    stdu 9, -8(1)\n");
+    printf("    or 9, 1, 1\n");
     //printf("    stw 0, 8(1)\n");
     //printf("    stwu 1, -16(1)\n");
     /*printf("    push %%rbp\n");
     printf("    mov %%rsp, %%rbp\n");*/
     myStatement(p -> body, p);
+    printf("    or 1, 9, 9\n");
+    printf("    ld 9, 0(1)\n");
+    printf("    addi 1, 1, 8\n");
     printf("    ld 0, 0(1)\n");
     printf("    addi 1, 1, 8\n");
     /*if (strcmp(p -> name, "main") == 0) {
         printf("    b exit\n");
     }*/
+    //New 3 lines
+    /*printf("    or 1, 9, 9\n");
+    printf("    ld 9, 0(1)\n");
+    printf("    addi 1, 1, 8\n");*/
     printf("    mtlr 0\n");
     printf("    blr\n");
     /*if (strcmp(p -> name, "main") == 0) {

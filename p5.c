@@ -100,24 +100,17 @@ void myExpression (Expression * e, Fun * p) {
                 int inside = formal(p, e -> varName);
                 if (inside == -1) {
                     set(e -> varName);
-                    //int offset = 8 * (table -> index);
-                    //Add part where e->varName's memory address is copied to r4
                     printf("    ld 3, %s@toc(2)\n", table -> name);
-                    //printf("    ld 3, %d@toc(2)\n", 8 * (table -> index));
-                    //printf("    ld 3, 0(4)\n");
                     //printf("    mov %s, %%r15\n", e -> varName);
                 }
                 else {
-                    //Figure this out
-                    int offset = 8 * (inside + 1);
-                    printf("    ld 3, %d(2)\n", offset);
-                    //printf("    ld 3, %d@toc(2)\n", 8 * (inside + 1));
+                    int offset = 8 * (inside);
+                    printf("    ld 3, %d(1)\n", offset);
                     //printf("    mov %d(%%rbp), %%r15\n", 8 * (inside + 1));
                 }
                 break;
             }
             case eVAL : {
-                //The number outside parentheses might be 8 or 16 or diff idk yet
                 //Copy from register to memory
                 printf("    stdu 4, -8(1)\n");
                 //Check printf syntax
@@ -125,7 +118,6 @@ void myExpression (Expression * e, Fun * p) {
                 printf("    or 3, 4, 4\n");
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
-                //printf("    addi 1, 1, -16\n");
                 /*printf("    push %%r13\n");
                 printf("    mov $");
                 printf("%lu", e -> val);
@@ -179,7 +171,7 @@ void myExpression (Expression * e, Fun * p) {
                 printf("    or 4, 3, 3\n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
-                printf("    cmpd 3, 5\n");
+                printf("    cmpd 3, 4\n");
                 //printf("    beq correct");
                 printf("    bne notcorrect\n");
                 printf("    blt notcorrect\n");
@@ -194,7 +186,7 @@ void myExpression (Expression * e, Fun * p) {
                 printf("    or 4, 3, 3\n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
-                printf("    cmpd 3, 5\n");
+                printf("    cmpd 3, 4\n");
                 //printf("    bne correct");
                 printf("    beq notcorrect\n");
                 printf("    blt notcorrect\n");
@@ -209,7 +201,7 @@ void myExpression (Expression * e, Fun * p) {
                 printf("    or 4, 3, 3\n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
-                printf("    cmpd 3, 5\n");
+                printf("    cmpd 3, 4\n");
                 //printf("    blt correct");
                 printf("    beq notcorrect\n");
                 printf("    bne notcorrect\n");
@@ -224,7 +216,7 @@ void myExpression (Expression * e, Fun * p) {
                 printf("    or 4, 3, 3\n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
-                printf("    cmpd 3, 5\n");
+                printf("    cmpd 3, 4\n");
                 //printf("    bgt correct");
                 printf("    beq notcorrect\n");
                 printf("    bne notcorrect\n");
@@ -286,8 +278,8 @@ void myStatement(Statement * s, Fun * p) {
                     printf("%s\n", s -> assignName);*/
                 }
                 else {
-                    int offset = 8 * (inside + 1);
-                    printf("    std 3, %d(2)\n", offset);
+                    int offset = 8 * (inside);
+                    printf("    std 3, %d(1)\n", offset);
                     //printf("    std 3, %d@toc(2)\n", 8 * (inside + 1));
                     //printf("    mov %%r15, %d(%%rbp)\n", 8 * (inside + 1));
                 }
@@ -344,7 +336,9 @@ void myStatement(Statement * s, Fun * p) {
             } 
             case sReturn : {
                 myExpression(s -> returnValue, p);
-                printf("    lwz 0, 8(1)\n");
+                printf("    ld 0, 0(1)\n");
+                printf("    addi 1, 1, 8\n");
+                printf("    ld 0, 8(1)\n");
                 printf("    mtlr 0\n");
                 printf("    blr\n");
                 /*printf("    mov %%rbp, %%rsp\n");

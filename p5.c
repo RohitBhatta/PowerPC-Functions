@@ -12,6 +12,8 @@ int elseCount = 0;
 int completeCount = 0;
 int againCount = 0;
 int finishedCount = 0;
+int notCorrectCount = 0;
+int correctCount = 0;
 int structIndex = 0;
 
 //Struct
@@ -173,9 +175,16 @@ void myExpression (Expression * e, Fun * p) {
                 myExpression(e -> right, p);
                 printf("    cmpd 3, 4\n");
                 //printf("    beq correct");
-                printf("    bne notcorrect\n");
-                printf("    blt notcorrect\n");
-                printf("    bgt notcorrect\n");
+                int notCorrectTemp = notCorrectCount;
+                int correctTemp = correctCount;
+                notCorrectCount++;
+                correctCount++;
+                printf("    bne notcorrect%d\n", notCorrectTemp);
+                printf("    li 3, 1\n");
+                printf("    b correct%d\n", correctTemp);
+                printf("    notcorrect%d:\n", notCorrectTemp);
+                printf("    li 3, 0\n");
+                printf("    correct%d:\n", correctTemp);
                 /*printf("    cmp %%r13, %%r15\n");
                 printf("    setz %%r15b\n");
                 printf("    movzx %%r15b, %%r15\n");*/ 
@@ -188,9 +197,16 @@ void myExpression (Expression * e, Fun * p) {
                 myExpression(e -> right, p);
                 printf("    cmpd 3, 4\n");
                 //printf("    bne correct");
-                printf("    beq notcorrect\n");
-                printf("    blt notcorrect\n");
-                printf("    bgt notcorrect\n");
+                int notCorrectTemp = notCorrectCount;
+                int correctTemp = correctCount;
+                notCorrectCount++;
+                correctCount++;
+                printf("    beq notcorrect%d\n", notCorrectTemp);
+                printf("    li 3, 1\n");
+                printf("    b correct%d\n", correctTemp);
+                printf("    notcorrect%d:\n", notCorrectTemp);
+                printf("    li 3, 0\n");
+                printf("    correct%d:\n", correctTemp);
                 /*printf("    cmp %%r13, %%r15\n");
                 printf("    setnz %%r15b\n");
                 printf("    movzx %%r15b, %%r15\n");*/ 
@@ -203,9 +219,17 @@ void myExpression (Expression * e, Fun * p) {
                 myExpression(e -> right, p);
                 printf("    cmpd 3, 4\n");
                 //printf("    blt correct");
-                printf("    beq notcorrect\n");
-                printf("    bne notcorrect\n");
-                printf("    bgt notcorrect\n");
+                int notCorrectTemp = notCorrectCount;
+                int correctTemp = correctCount;
+                notCorrectCount++;
+                correctCount++;
+                printf("    beq notcorrect%d\n", notCorrectTemp);
+                printf("    blt notcorrect%d\n", notCorrectTemp);
+                printf("    li 3, 1\n");
+                printf("    b correct%d\n", correctTemp);
+                printf("    notcorrect%d:\n", notCorrectTemp);
+                printf("    li 3, 0\n");
+                printf("    correct%d:\n", correctTemp);
                 /*printf("    cmp %%r15, %%r13\n");
                 printf("    setl %%r15b\n");
                 printf("    movzx %%r15b, %%r15\n");*/
@@ -218,9 +242,17 @@ void myExpression (Expression * e, Fun * p) {
                 myExpression(e -> right, p);
                 printf("    cmpd 3, 4\n");
                 //printf("    bgt correct");
-                printf("    beq notcorrect\n");
-                printf("    bne notcorrect\n");
-                printf("    blt notcorrect\n");
+                int notCorrectTemp = notCorrectCount;
+                int correctTemp = correctCount;
+                notCorrectCount++;
+                correctCount++;
+                printf("    beq notcorrect%d\n", notCorrectTemp);
+                printf("    bgt notcorrect%d\n", notCorrectTemp);
+                printf("    li 3, 1\n");
+                printf("    b correct%d\n", correctTemp);
+                printf("    notcorrect%d:\n", notCorrectTemp);
+                printf("    li 3, 0\n");
+                printf("    correct%d:\n", correctTemp);
                 /*printf("    cmp %%r15, %%r13\n");
                 printf("    setg %%r15b\n");
                 printf("    movzx %%r15b, %%r15\n");*/
@@ -303,9 +335,11 @@ void myStatement(Statement * s, Fun * p) {
                 completeCount++;
                 /*printf("    cmp $0, %%r15\n");
                 printf("%s%d\n", "    je else", elseTemp);*/
+                printf("    li 6, 0\n");
+                printf("    cmpd 3, 6\n");
+                printf("%s%d\n", "    beq else", elseTemp);
                 myStatement(s -> ifThen, p);
                 printf("%s%d\n", "    b complete", completeTemp);
-                printf("    notcorrect:\n");
                 printf("%s%d%s\n", "    else", elseTemp, ":");
                 myStatement(s -> ifElse, p);
                 printf("%s%d%s\n", "    complete", completeTemp, ":");
@@ -319,8 +353,9 @@ void myStatement(Statement * s, Fun * p) {
                 printf("%s%d%s\n", "    again", againTemp, ":");
                 myExpression(s -> whileCondition, p);
                 //printf("    cmp $0, %%r15\n");
-                printf("    notcorrect:\n");
-                printf("%s%d\n", "    b finished", finishedTemp);
+                printf("    li 6, 0\n");
+                printf("    cmpd 3, 6\n");
+                printf("%s%d\n", "    beq finished", finishedTemp);
                 myStatement(s -> whileBody, p);
                 printf("%s%d\n", "    b again", againTemp);
                 printf("%s%d%s\n", "    finished", finishedTemp, ":");

@@ -338,7 +338,7 @@ void myStatement(Statement * s, Fun * p) {
                 myExpression(s -> returnValue, p);
                 printf("    ld 0, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
-                printf("    ld 0, 8(1)\n");
+                //printf("    ld 0, 8(1)\n");
                 printf("    mtlr 0\n");
                 printf("    blr\n");
                 /*printf("    mov %%rbp, %%rsp\n");
@@ -371,7 +371,7 @@ void genFun(Fun * p) {
     /*if (strcmp(p -> name, "main") == 0) {
         printf("    b exit\n");
     }*/
-    printf("    ld 0, 8(1)\n");
+    //printf("    ld 0, 8(1)\n");
     printf("    mtlr 0\n");
     printf("    blr\n");
     /*if (strcmp(p -> name, "main") == 0) {

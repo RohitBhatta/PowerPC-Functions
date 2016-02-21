@@ -24,7 +24,7 @@ p5 : $(OFILES) Makefile
 	gcc $(CFLAGS) -MD -c $*.c
 
 %.o : %.S Makefile
-	($(AS) -o $*.o $*.S) || touch $@
+	($(AS) -g -o $*.o $*.S) || touch $@
 
 %.S : %.fun p5
 	@echo "========== $* =========="
@@ -33,7 +33,7 @@ p5 : $(OFILES) Makefile
 progs : $(PROGS)
 
 ppc.o : ppc.asm
-	($(AS) -o $*.o $*.asm) || touch $@
+	($(AS) -g -o $*.o $*.asm) || touch $@
 
 $(PROGS) : % : %.o ppc.o
 	($(LD) -e entry -o $@ $*.o ppc.o) || touch $@

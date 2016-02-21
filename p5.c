@@ -102,12 +102,14 @@ void myExpression (Expression * e, Fun * p) {
                 int inside = formal(p, e -> varName);
                 if (inside == -1) {
                     set(e -> varName);
+                    //printf("    64bit [3] [%s@toc(2)]\n", table -> name);
                     printf("    ld 3, %s@toc(2)\n", table -> name);
                     //printf("    mov %s, %%r15\n", e -> varName);
                 }
                 else {
                     //int offset = 8 * (inside);
                     int offset = 8 * (inside + 1);
+                    //printf("    64bit [3] [%d(9)]\n", offset);
                     printf("    ld 3, %d(9)\n", offset);
                     //printf("    ld 3, %d(1)\n", offset);
                     //printf("    mov %d(%%rbp), %%r15\n", 8 * (inside + 1));
@@ -118,7 +120,8 @@ void myExpression (Expression * e, Fun * p) {
                 //Copy from register to memory
                 printf("    stdu 4, -8(1)\n");
                 //Check printf syntax
-                printf("    li 4, %lu\n", e -> val);
+                printf("    convert64bit 4, %lu\n", e -> val);
+                //printf("    li 4, %lu\n", e -> val);
                 printf("    or 3, 4, 4\n");
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
@@ -182,10 +185,12 @@ void myExpression (Expression * e, Fun * p) {
                 notCorrectCount++;
                 correctCount++;
                 printf("    bne notcorrect%d\n", notCorrectTemp);
-                printf("    li 3, 1\n");
+                printf("    convert64bit 3, 1\n");
+                //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
                 printf("    notcorrect%d:\n", notCorrectTemp);
-                printf("    li 3, 0\n");
+                printf("    convert64bit 3, 0\n");
+                //printf("    li 3, 0\n");
                 printf("    correct%d:\n", correctTemp);
                 /*printf("    cmp %%r13, %%r15\n");
                 printf("    setz %%r15b\n");
@@ -204,10 +209,12 @@ void myExpression (Expression * e, Fun * p) {
                 notCorrectCount++;
                 correctCount++;
                 printf("    beq notcorrect%d\n", notCorrectTemp);
-                printf("    li 3, 1\n");
+                printf("    convert64bit 3, 1\n");
+                //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
                 printf("    notcorrect%d:\n", notCorrectTemp);
-                printf("    li 3, 0\n");
+                printf("    convert64bit 3, 0\n");
+                //printf("    li 3, 0\n");
                 printf("    correct%d:\n", correctTemp);
                 /*printf("    cmp %%r13, %%r15\n");
                 printf("    setnz %%r15b\n");
@@ -227,10 +234,12 @@ void myExpression (Expression * e, Fun * p) {
                 correctCount++;
                 printf("    beq notcorrect%d\n", notCorrectTemp);
                 printf("    blt notcorrect%d\n", notCorrectTemp);
-                printf("    li 3, 1\n");
+                printf("    convert64bit 3, 1\n");
+                //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
                 printf("    notcorrect%d:\n", notCorrectTemp);
-                printf("    li 3, 0\n");
+                printf("    convert64bit 3, 0\n");
+                //printf("    li 3, 0\n");
                 printf("    correct%d:\n", correctTemp);
                 /*printf("    cmp %%r15, %%r13\n");
                 printf("    setl %%r15b\n");
@@ -250,10 +259,12 @@ void myExpression (Expression * e, Fun * p) {
                 correctCount++;
                 printf("    beq notcorrect%d\n", notCorrectTemp);
                 printf("    bgt notcorrect%d\n", notCorrectTemp);
-                printf("    li 3, 1\n");
+                printf("    convert64bit 3, 1\n");
+                //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
                 printf("    notcorrect%d:\n", notCorrectTemp);
-                printf("    li 3, 0\n");
+                printf("    convert64bit 3, 0\n");
+                //printf("    li 3, 0\n");
                 printf("    correct%d:\n", correctTemp);
                 /*printf("    cmp %%r15, %%r13\n");
                 printf("    setg %%r15b\n");
@@ -339,7 +350,8 @@ void myStatement(Statement * s, Fun * p) {
                 completeCount++;
                 /*printf("    cmp $0, %%r15\n");
                 printf("%s%d\n", "    je else", elseTemp);*/
-                printf("    li 6, 0\n");
+                printf("    convert64bit 6, 0\n");
+                //printf("    li 6, 0\n");
                 printf("    cmpd 3, 6\n");
                 printf("%s%d\n", "    beq else", elseTemp);
                 myStatement(s -> ifThen, p);
@@ -357,7 +369,8 @@ void myStatement(Statement * s, Fun * p) {
                 printf("%s%d%s\n", "    again", againTemp, ":");
                 myExpression(s -> whileCondition, p);
                 //printf("    cmp $0, %%r15\n");
-                printf("    li 6, 0\n");
+                printf("    convert64bit 6, 0\n");
+                //printf("    li 6, 0\n");
                 printf("    cmpd 3, 6\n");
                 printf("%s%d\n", "    beq finished", finishedTemp);
                 myStatement(s -> whileBody, p);
@@ -444,6 +457,13 @@ int main(int argc, char *argv[]) {
     Funs *p = parse();
     table = (struct Entry *) malloc(sizeof(struct Entry));
     //printf("    addi 1,2,-8\n");       /* SP */
+    printf(".macro convert64bit register immediate\n");
+    printf("    lis \\register,\\immediate@highest\n");
+    printf("    ori \\register,\\register,\\immediate@higher\n");
+    printf("    rldicr  \\register,\\register,32,31\n");
+    printf("    oris    \\register,\\register,\\immediate@h\n");
+    printf("    ori     \\register,\\register,\\immediate@l\n");
+    printf(".endm\n");
     printf("    .global main\n");
     printf("main:\n");
     printf("    bl _main\n");

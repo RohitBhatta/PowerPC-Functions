@@ -372,12 +372,15 @@ void genFun(Fun * p) {
     myStatement(p -> body, p);
     //This first line might be wrong
     //printf("    addi 1, 1, 16\n");
-    printf("    lwz 0, 8(1)\n");
-    printf("    mtlr 0\n");
-    printf("    blr\n");
     if (strcmp(p -> name, "main") == 0) {
         printf("    b exit\n");
     }
+    printf("    lwz 0, 8(1)\n");
+    printf("    mtlr 0\n");
+    printf("    blr\n");
+    /*if (strcmp(p -> name, "main") == 0) {
+        printf("    b exit\n");
+    }*/
     /*printf("    mov %%rbp, %%rsp\n");
     printf("    pop %%rbp\n");
     printf("    mov $0,%%rax\n");

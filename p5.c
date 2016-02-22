@@ -20,7 +20,6 @@ int structIndex = 0;
 struct Entry {
     struct Entry *next;
     char *name;
-    //int index;
 };
 
 //Global struct
@@ -33,7 +32,6 @@ void set(char *id) {
     if (first == 0) {
         table -> name = id;
         table -> next = NULL;
-        //table -> index = structIndex++;
         first++;
         tableCount++;
     }
@@ -60,7 +58,6 @@ void set(char *id) {
             current = current -> next;
             current -> name = id;
             current -> next = NULL;
-            //current -> index = structIndex++;
             tableCount++;
         }
     }
@@ -68,9 +65,6 @@ void set(char *id) {
 
 //Renames functions to deal with reserved names in Assembly x86
 char* funcRename(char * var) {
-    /*if (strcmp(var, "main") == 0) {
-        return var;
-    }*/
     size_t size = strlen(var) + 1;
     char *fullName = malloc(size);
     strcpy(fullName, "_");
@@ -102,175 +96,114 @@ void myExpression (Expression * e, Fun * p) {
                 int inside = formal(p, e -> varName);
                 if (inside == -1) {
                     set(e -> varName);
-                    //printf("    64bit [3] [%s@toc(2)]\n", table -> name);
                     printf("    ld 3, %s@toc(2)\n", e -> varName);
-                    //printf("    mov %s, %%r15\n", e -> varName);
                 }
                 else {
-                    //int offset = 8 * (inside);
                     int offset = 8 * (inside + 1);
-                    //printf("    64bit [3] [%d(9)]\n", offset);
                     printf("    ld 3, %d(9)\n", offset);
-                    //printf("    ld 3, %d(1)\n", offset);
-                    //printf("    mov %d(%%rbp), %%r15\n", 8 * (inside + 1));
                 }
                 break;
             }
             case eVAL : {
-                //Copy from register to memory
                 printf("    stdu 4, -8(1)\n");
-                //Check printf syntax
                 printf("    convert64bit 4, %lu\n", e -> val);
-                //printf("    li 4, %lu\n", e -> val);
                 printf("    mr 3, 4\n");
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
-                /*printf("    push %%r13\n");
-                printf("    mov $");
-                printf("%lu", e -> val);
-                printf(", %%r13\n");
-                printf("    mov %%r13, %%r15\n");
-                printf("    pop %%r13\n");*/
                 break;
             }
             case ePLUS : {
-                //Copy from register to memory
                 printf("    stdu 4, -8(1)\n");
-                //printf("    push %%r13\n");
                 myExpression(e -> left, p);
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    mr 4, 3\n");
-                /*printf("    pop %%r13\n");
-                printf("    mov %%r15, %%r13\n");
-                printf("    push %%r13\n");*/
                 printf("    stdu 4, -8(1)\n");
                 myExpression(e -> right, p);
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    add 3, 3, 4\n");
-                /*printf("    pop %%r13\n");
-                printf("    add %%r13, %%r15\n");*/
                 break;
             }
             case eMUL : {
-                //Copy from register to memory
                 printf("    stdu 4, -8(1)\n");
-                //printf("    push %%r13\n");
                 myExpression(e -> left, p);
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    mr 4, 3\n");
-                /*printf("    pop %%r13\n");
-                printf("    mov %%r15, %%r13\n");
-                printf("    push %%r13\n");*/
                 printf("    stdu 4, -8(1)\n");
                 myExpression(e -> right, p);
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    mulld 3, 3, 4\n");
-                /*printf("    pop %%r13\n");
-                printf("    imul %%r13, %%r15\n");*/
                 break;
             }
             case eEQ : {
                 myExpression(e -> left, p);
                 printf("    mr 4, 3\n");
-                //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
                 printf("    cmpd 3, 4\n");
-                //printf("    beq correct");
                 int notCorrectTemp = notCorrectCount;
                 int correctTemp = correctCount;
                 notCorrectCount++;
                 correctCount++;
                 printf("    bne notcorrect%d\n", notCorrectTemp);
                 printf("    convert64bit 3, 1\n");
-                //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
                 printf("    notcorrect%d:\n", notCorrectTemp);
                 printf("    convert64bit 3, 0\n");
-                //printf("    li 3, 0\n");
                 printf("    correct%d:\n", correctTemp);
-                /*printf("    cmp %%r13, %%r15\n");
-                printf("    setz %%r15b\n");
-                printf("    movzx %%r15b, %%r15\n");*/ 
                 break;
             }
             case eNE : {
                 myExpression(e -> left, p);
                 printf("    mr 4, 3\n");
-                //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
                 printf("    cmpd 3, 4\n");
-                //printf("    bne correct");
                 int notCorrectTemp = notCorrectCount;
                 int correctTemp = correctCount;
                 notCorrectCount++;
                 correctCount++;
                 printf("    beq notcorrect%d\n", notCorrectTemp);
                 printf("    convert64bit 3, 1\n");
-                //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
                 printf("    notcorrect%d:\n", notCorrectTemp);
                 printf("    convert64bit 3, 0\n");
-                //printf("    li 3, 0\n");
                 printf("    correct%d:\n", correctTemp);
-                /*printf("    cmp %%r13, %%r15\n");
-                printf("    setnz %%r15b\n");
-                printf("    movzx %%r15b, %%r15\n");*/ 
                 break;
             } 
             case eLT : {
                 myExpression(e -> left, p);
                 printf("    mr 4, 3 \n");
-                //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
                 printf("    cmpd 4, 3\n");
-                //printf("    blt correct");
                 int notCorrectTemp = notCorrectCount;
                 int correctTemp = correctCount;
                 notCorrectCount++;
                 correctCount++;
                 printf("    bge notcorrect%d\n", notCorrectTemp);
-                //printf("    beq notcorrect%d\n", notCorrectTemp);
-                //printf("    blt notcorrect%d\n", notCorrectTemp);
                 printf("    convert64bit 3, 1\n");
-                //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
                 printf("    notcorrect%d:\n", notCorrectTemp);
                 printf("    convert64bit 3, 0\n");
-                //printf("    li 3, 0\n");
                 printf("    correct%d:\n", correctTemp);
-                /*printf("    cmp %%r15, %%r13\n");
-                printf("    setl %%r15b\n");
-                printf("    movzx %%r15b, %%r15\n");*/
                 break;
             }
             case eGT : {
                 myExpression(e -> left, p);
                 printf("    mr 4, 3\n");
-                //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
                 printf("    cmpd 4, 3\n");
-                //printf("    bgt correct");
                 int notCorrectTemp = notCorrectCount;
                 int correctTemp = correctCount;
                 notCorrectCount++;
                 correctCount++;
                 printf("    ble notcorrect%d\n", notCorrectTemp);
-                //printf("    beq notcorrect%d\n", notCorrectTemp);
-                //printf("    bgt notcorrect%d\n", notCorrectTemp);
                 printf("    convert64bit 3, 1\n");
-                //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
                 printf("    notcorrect%d:\n", notCorrectTemp);
                 printf("    convert64bit 3, 0\n");
-                //printf("    li 3, 0\n");
                 printf("    correct%d:\n", correctTemp);
-                /*printf("    cmp %%r15, %%r13\n");
-                printf("    setg %%r15b\n");
-                printf("    movzx %%r15b, %%r15\n");*/
                 break;
             }
             case eCALL : {
@@ -283,18 +216,14 @@ void myExpression (Expression * e, Fun * p) {
                             }
                             myExpression(actual -> first, p);
                             printf("    stdu 3, -8(1)\n");
-                            //printf("    push %%r15\n");
                         }
                     }
                 }
                 char *newName = funcRename(e -> callName);
                 printf("    bl %s\n", newName);
-                //printf("    call ");
-                //printf("%s\n", newName);
                 if (e != NULL) {
                     if (e -> callActuals != NULL) {
                         for (int i = 0; i < e -> callActuals -> n; i++) {
-                            //printf("    pop %%r14\n");
                             printf("    ld 5, 0(1)\n");
                             printf("    addi 1, 1, 8\n");
                         }
@@ -318,19 +247,11 @@ void myStatement(Statement * s, Fun * p) {
                 int inside = formal(p, s -> assignName);
                 if (inside == -1) {
                     set(s -> assignName);
-                    //int offset = 8 * (table -> index);
                     printf("    std 3, %s@toc(2)\n", s -> assignName);
-                    //printf("    std 3, %d@toc(2)\n", 8 * (table -> index));
-                    /*printf("    mov %%r15, ");
-                    printf("%s\n", s -> assignName);*/
                 }
                 else {
-                    //int offset = 8 * (inside);
                     int offset = 8 * (inside + 1);
                     printf("    std 3, %d(9)\n", offset);
-                    //printf("    std 3, %d(1)\n", offset);
-                    //printf("    std 3, %d@toc(2)\n", 8 * (inside + 1));
-                    //printf("    mov %%r15, %d(%%rbp)\n", 8 * (inside + 1));
                 }
                 break;
             }
@@ -338,10 +259,6 @@ void myStatement(Statement * s, Fun * p) {
                 myExpression(s -> printValue, p);
                 printf("    mr 15, 3\n");
                 printf("    bl print\n");
-                /*printf("    mov $p4_format, %%rdi\n");
-                printf("    mov %%r15, %%rsi\n");
-                printf("    mov $0, %%rax\n");
-                printf("    call printf\n");*/
                 break;
             }
             case sIf : {
@@ -350,11 +267,6 @@ void myStatement(Statement * s, Fun * p) {
                 int completeTemp = completeCount;
                 elseCount++;
                 completeCount++;
-                /*printf("    cmp $0, %%r15\n");
-                printf("%s%d\n", "    je else", elseTemp);*/
-                //printf("    convert64bit 6, 0\n");
-                //printf("    li 6, 0\n");
-                //printf("    cmpd 3, 6\n");
                 printf("    cmpdi 3, 0\n");
                 printf("%s%d\n", "    beq else", elseTemp);
                 myStatement(s -> ifThen, p);
@@ -371,10 +283,6 @@ void myStatement(Statement * s, Fun * p) {
                 finishedCount++;
                 printf("%s%d%s\n", "    again", againTemp, ":");
                 myExpression(s -> whileCondition, p);
-                //printf("    cmp $0, %%r15\n");
-                //printf("    convert64bit 6, 0\n");
-                //printf("    li 6, 0\n");
-                //printf("    cmpd 3, 6\n");
                 printf("    cmpdi 3, 0\n");
                 printf("%s%d\n", "    beq finished", finishedTemp);
                 myStatement(s -> whileBody, p);
@@ -399,10 +307,6 @@ void myStatement(Statement * s, Fun * p) {
                 printf("    addi 1, 1, 8\n");
                 printf("    mtlr 0\n");
                 printf("    blr\n");
-                /*printf("    mov %%rbp, %%rsp\n");
-                printf("    pop %%rbp\n");
-                printf("    mov $0,%%rax\n");
-                printf("    ret\n");*/
                 break;
             } 
             default : {
@@ -416,38 +320,20 @@ void genFun(Fun * p) {
     char *rename = funcRename(p -> name);
     printf("    .global %s\n", rename);
     printf("%s:\n", rename);
-    //Set up stack frame
     printf("    mflr 0\n");
     printf("    stdu 0, -8(1)\n");
-    //New 2 lines
+    //Move rbp to rsp
     printf("    stdu 9, -8(1)\n");
     printf("    mr 9, 1\n");
-    //printf("    stw 0, 8(1)\n");
-    //printf("    stwu 1, -16(1)\n");
-    /*printf("    push %%rbp\n");
-    printf("    mov %%rsp, %%rbp\n");*/
     myStatement(p -> body, p);
+    //Move rsp back to rbp
     printf("    mr 1, 9\n");
     printf("    ld 9, 0(1)\n");
     printf("    addi 1, 1, 8\n");
     printf("    ld 0, 0(1)\n");
     printf("    addi 1, 1, 8\n");
-    /*if (strcmp(p -> name, "main") == 0) {
-        printf("    b exit\n");
-    }*/
-    //New 3 lines
-    /*printf("    or 1, 9, 9\n");
-    printf("    ld 9, 0(1)\n");
-    printf("    addi 1, 1, 8\n");*/
     printf("    mtlr 0\n");
     printf("    blr\n");
-    /*if (strcmp(p -> name, "main") == 0) {
-        printf("    b exit\n");
-    }*/
-    /*printf("    mov %%rbp, %%rsp\n");
-    printf("    pop %%rbp\n");
-    printf("    mov $0,%%rax\n");
-    printf("    ret\n");*/
 }
 
 void genFuns(Funs * p) {
@@ -460,7 +346,7 @@ void genFuns(Funs * p) {
 int main(int argc, char *argv[]) {
     Funs *p = parse();
     table = (struct Entry *) malloc(sizeof(struct Entry));
-    //printf("    addi 1,2,-8\n");       /* SP */
+    //Macro that takes care of numbers larger than 16 bits
     printf(".macro convert64bit register immediate\n");
     printf("    lis \\register,\\immediate@highest\n");
     printf("    ori \\register,\\register,\\immediate@higher\n");
@@ -473,22 +359,6 @@ int main(int argc, char *argv[]) {
     printf("    bl _main\n");
     printf("    b exit\n");
     genFuns(p);
-
-    //This part is weird
-    //Copy p4 code because this prints 42
-    /*printf("    .global main\n");
-    printf("main:\n");
-    printf("    addi 1,2,-8\n");*/        /* SP */
-    /*printf("    li 15,42\n");
-    printf("    bl print\n");
-    printf("    b exit\n");*/
-
-    //Moved data section in front because of segaults mentioned on piazza
-    /*printf("    .data\n");
-    printf("data : .fill %d\n", howManyBytes);
-    
-    printf("     .fill 8000\n");*/
-    //printf("stackBottom:\n");
 
     printf("    .section \".toc\", \"aw\"\n");
     if (tableCount != 0) {
@@ -503,16 +373,10 @@ int main(int argc, char *argv[]) {
         printf(": .quad 0\n");
         table = table -> next;
     }
-    /*printf("    .data\n");
-    printf("data : .fill %d\n", howManyBytes);*/
-
-    //printf("    b exit\n");
-    //printf(".section \".opd\", \"aw\"\n");
     printf("    .global entry\n");
     printf("entry :\n");
     printf("    .quad main\n");
     printf("    .quad .TOC.@tocbase\n");
-    //printf("    .quad data\n");
     printf("    .quad 0\n");
 
     return 0;

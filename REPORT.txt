@@ -1,5 +1,8 @@
 - What are the differences between RISC and CISC architectures?
 
+x86 Assembly is an example of CISC architecture, and PowerPC is an example of RISC architecture. CISC assembly aims to complete a task in as few lines of assembly as possible. Most of the strain is put on the hardware. CISC assembly contains "complex instructions" where one command can represent multiple operations. It is at a slightly higher level compared to RISC because low level details like loading and storing are taken care of implicitly by the hardware and are not of concern to the programmer. RISC differs in that the emphasis is on the software. RISC assembly generally has many more lines of code because the hardware is simplified. One disadvantage of RISC is that more RAM is needed to store the greater number of instructions. However, RISC assembly has a few advantages. Since each instruction only uses one clock cyle to execute, the whole program can be executed much faster than its corresponding CISC program. Less hardware is needed, and therefore more empty space is available for registers.
+
+
 - Describe how your implementation:
 
     * passes arguments
@@ -7,7 +10,12 @@
     * stores global variables
     * returns values from functions
 
+Most of the logic of my implementation was exactly the same as that of p4. I passed arguments in reverse order in my eCall switch case and popped them off the stack so they would be back in order. I first check if a variable is local or global my checking if it exists in my symbol table. If it's in my symbol table, then it is global and I add it to my base pointer with an offset. If it is local, I simply add it to my TOC. When I returned values from functions I just had to make sure that the return register had the return value. I then moved the stack pointer back to the base pointer, and popped the base pointer. Then I pop the temporary register that contains the path to the link register before I move to the link register. Finally, I simply return with the blr command. This sequence of instructions ensures the code will not break with segmentation fault and that the return register contains the value we want.
+
+
 - In PPC64, What is the purpose of:
 
     * The TOC
     * Function descriptors
+
+TOC stands for table of contents. It is used to store and access variables (in the way the stack was used in p4). The TOC contains pointers addressed using positive offsets from r2. Function descriptors are data structures that contain the address of the entry point of the function, the TOC base address for the function, and the environment pointer. They are necessary because we cannot simply call the function name. If the assembly is called from C code, the compiler expects a function descriptor, so we must provide one.

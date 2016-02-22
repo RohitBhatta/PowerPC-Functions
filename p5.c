@@ -103,7 +103,7 @@ void myExpression (Expression * e, Fun * p) {
                 if (inside == -1) {
                     set(e -> varName);
                     //printf("    64bit [3] [%s@toc(2)]\n", table -> name);
-                    printf("    ld 3, %s@toc(2)\n", table -> name);
+                    printf("    ld 3, %s@toc(2)\n", e -> varName);
                     //printf("    mov %s, %%r15\n", e -> varName);
                 }
                 else {
@@ -122,7 +122,7 @@ void myExpression (Expression * e, Fun * p) {
                 //Check printf syntax
                 printf("    convert64bit 4, %lu\n", e -> val);
                 //printf("    li 4, %lu\n", e -> val);
-                printf("    or 3, 4, 4\n");
+                printf("    mr 3, 4\n");
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 /*printf("    push %%r13\n");
@@ -140,7 +140,7 @@ void myExpression (Expression * e, Fun * p) {
                 myExpression(e -> left, p);
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
-                printf("    or 4, 3, 3\n");
+                printf("    mr 4, 3\n");
                 /*printf("    pop %%r13\n");
                 printf("    mov %%r15, %%r13\n");
                 printf("    push %%r13\n");*/
@@ -160,7 +160,7 @@ void myExpression (Expression * e, Fun * p) {
                 myExpression(e -> left, p);
                 printf("    ld 4, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
-                printf("    or 4, 3, 3\n");
+                printf("    mr 4, 3\n");
                 /*printf("    pop %%r13\n");
                 printf("    mov %%r15, %%r13\n");
                 printf("    push %%r13\n");*/
@@ -175,7 +175,7 @@ void myExpression (Expression * e, Fun * p) {
             }
             case eEQ : {
                 myExpression(e -> left, p);
-                printf("    or 4, 3, 3\n");
+                printf("    mr 4, 3\n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
                 printf("    cmpd 3, 4\n");
@@ -199,7 +199,7 @@ void myExpression (Expression * e, Fun * p) {
             }
             case eNE : {
                 myExpression(e -> left, p);
-                printf("    or 4, 3, 3\n");
+                printf("    mr 4, 3\n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
                 printf("    cmpd 3, 4\n");
@@ -223,17 +223,18 @@ void myExpression (Expression * e, Fun * p) {
             } 
             case eLT : {
                 myExpression(e -> left, p);
-                printf("    or 4, 3, 3\n");
+                printf("    mr 4, 3 \n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
-                printf("    cmpd 3, 4\n");
+                printf("    cmpd 4, 3\n");
                 //printf("    blt correct");
                 int notCorrectTemp = notCorrectCount;
                 int correctTemp = correctCount;
                 notCorrectCount++;
                 correctCount++;
-                printf("    beq notcorrect%d\n", notCorrectTemp);
-                printf("    blt notcorrect%d\n", notCorrectTemp);
+                printf("    bge notcorrect%d\n", notCorrectTemp);
+                //printf("    beq notcorrect%d\n", notCorrectTemp);
+                //printf("    blt notcorrect%d\n", notCorrectTemp);
                 printf("    convert64bit 3, 1\n");
                 //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
@@ -248,17 +249,18 @@ void myExpression (Expression * e, Fun * p) {
             }
             case eGT : {
                 myExpression(e -> left, p);
-                printf("    or 4, 3, 3\n");
+                printf("    mr 4, 3\n");
                 //printf("    mov %%r15, %%r13\n");
                 myExpression(e -> right, p);
-                printf("    cmpd 3, 4\n");
+                printf("    cmpd 4, 3\n");
                 //printf("    bgt correct");
                 int notCorrectTemp = notCorrectCount;
                 int correctTemp = correctCount;
                 notCorrectCount++;
                 correctCount++;
-                printf("    beq notcorrect%d\n", notCorrectTemp);
-                printf("    bgt notcorrect%d\n", notCorrectTemp);
+                printf("    ble notcorrect%d\n", notCorrectTemp);
+                //printf("    beq notcorrect%d\n", notCorrectTemp);
+                //printf("    bgt notcorrect%d\n", notCorrectTemp);
                 printf("    convert64bit 3, 1\n");
                 //printf("    li 3, 1\n");
                 printf("    b correct%d\n", correctTemp);
@@ -317,7 +319,7 @@ void myStatement(Statement * s, Fun * p) {
                 if (inside == -1) {
                     set(s -> assignName);
                     //int offset = 8 * (table -> index);
-                    printf("    std 3, %s@toc(2)\n", table -> name);
+                    printf("    std 3, %s@toc(2)\n", s -> assignName);
                     //printf("    std 3, %d@toc(2)\n", 8 * (table -> index));
                     /*printf("    mov %%r15, ");
                     printf("%s\n", s -> assignName);*/
@@ -334,7 +336,7 @@ void myStatement(Statement * s, Fun * p) {
             }
             case sPrint : {
                 myExpression(s -> printValue, p);
-                printf("    or 15, 3, 3\n");
+                printf("    mr 15, 3\n");
                 printf("    bl print\n");
                 /*printf("    mov $p4_format, %%rdi\n");
                 printf("    mov %%r15, %%rsi\n");
@@ -350,9 +352,10 @@ void myStatement(Statement * s, Fun * p) {
                 completeCount++;
                 /*printf("    cmp $0, %%r15\n");
                 printf("%s%d\n", "    je else", elseTemp);*/
-                printf("    convert64bit 6, 0\n");
+                //printf("    convert64bit 6, 0\n");
                 //printf("    li 6, 0\n");
-                printf("    cmpd 3, 6\n");
+                //printf("    cmpd 3, 6\n");
+                printf("    cmpdi 3, 0\n");
                 printf("%s%d\n", "    beq else", elseTemp);
                 myStatement(s -> ifThen, p);
                 printf("%s%d\n", "    b complete", completeTemp);
@@ -369,9 +372,10 @@ void myStatement(Statement * s, Fun * p) {
                 printf("%s%d%s\n", "    again", againTemp, ":");
                 myExpression(s -> whileCondition, p);
                 //printf("    cmp $0, %%r15\n");
-                printf("    convert64bit 6, 0\n");
+                //printf("    convert64bit 6, 0\n");
                 //printf("    li 6, 0\n");
-                printf("    cmpd 3, 6\n");
+                //printf("    cmpd 3, 6\n");
+                printf("    cmpdi 3, 0\n");
                 printf("%s%d\n", "    beq finished", finishedTemp);
                 myStatement(s -> whileBody, p);
                 printf("%s%d\n", "    b again", againTemp);
@@ -388,7 +392,7 @@ void myStatement(Statement * s, Fun * p) {
             } 
             case sReturn : {
                 myExpression(s -> returnValue, p);
-                printf("    or 1, 9, 9\n");
+                printf("    mr 1, 9\n");
                 printf("    ld 9, 0(1)\n");
                 printf("    addi 1, 1, 8\n");
                 printf("    ld 0, 0(1)\n");
@@ -417,13 +421,13 @@ void genFun(Fun * p) {
     printf("    stdu 0, -8(1)\n");
     //New 2 lines
     printf("    stdu 9, -8(1)\n");
-    printf("    or 9, 1, 1\n");
+    printf("    mr 9, 1\n");
     //printf("    stw 0, 8(1)\n");
     //printf("    stwu 1, -16(1)\n");
     /*printf("    push %%rbp\n");
     printf("    mov %%rsp, %%rbp\n");*/
     myStatement(p -> body, p);
-    printf("    or 1, 9, 9\n");
+    printf("    mr 1, 9\n");
     printf("    ld 9, 0(1)\n");
     printf("    addi 1, 1, 8\n");
     printf("    ld 0, 0(1)\n");
